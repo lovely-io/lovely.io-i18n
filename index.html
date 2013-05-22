@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>i18n Demo</title>
+    <link href="/shared.css" rel="stylesheet" type="text/css" />
+    <script src="/core.js"></script>
+    <!--
+      NOTE: do not include anything else in here!
+        all the styles and builds will be handled
+        automatically by the development server
+    -->
+  </head>
+  <body>
+    <h1>i18n Demo</h1>
+    <hr/>
+    <button id="english">English</button>
+    <button id="japanese">日本語</button>
+    The language files for these examples are available here.
+    <a href="http://roddeh.com/i18n/en.json" target="_blank">English</a>
+    <a href="http://roddeh.com/i18n/ja.json" target="_blank">Japanese</a>
+
+
+    <h2>The Simple Case</h2>
+    <div id="yes"></div>
+    <div id="no"></div>
+    <div id="ok"></div>
+    <div id="cancel"></div>
+    <h2>Pluralisation</h2>
+    <div id="comment0"></div>
+    <div id="comment1"></div>
+    <div id="comment2"></div>
+    <h2>Pluralisation - Another Application</h2>
+    <div id="due3"></div>
+    <div id="due2"></div>
+    <div id="due1"></div>
+    <div id="due0"></div>
+    <div id="due-1"></div>
+    <div id="due-2"></div>
+    <div id="due-3"></div>
+    <h2>Replacements</h2>
+    <div id="welcome1"></div>
+    <div id="welcome2"></div>
+    <h2>Context Sensitive Translation</h2>
+    <div id="profileMale"></div>
+    <div id="profileFemale"></div>
+    <h2>HTML Formatting</h2>
+    <div id="profileMaleFormatted"></div>
+    <div id="profileFemaleFormatted"></div>
+
+
+    <script type="text/javascript">
+      Lovely(["dom", "i18n"], function($, i18n){
+
+        function updateText(){
+          $("#yes").html(i18n._("Yes"));
+          $("#no").html(i18n._("No"));
+          $("#ok").html(i18n._("Ok"));
+          $("#cancel").html(i18n._("Cancel"));
+          $("#comment0").html(i18n._("%n comments", 0));
+          $("#comment1").html(i18n._("%n comments", 1));
+          $("#comment2").html(i18n._("%n comments", 2));
+          $("#due3").html(i18n._("Due in %n days", 3));
+          $("#due2").html(i18n._("Due in %n days", 2));
+          $("#due1").html(i18n._("Due in %n days", 1));
+          $("#due0").html(i18n._("Due in %n days", 0));
+          $("#due-1").html(i18n._("Due in %n days", -1));
+          $("#due-2").html(i18n._("Due in %n days", -2));
+          $("#due-3").html(i18n._("Due in %n days", -3));
+          $("#welcome1").html(i18n._("Welcome <%name%>", null, {name:"Tom"}));
+          $("#welcome2").html(i18n._("Welcome <%name%>", null, {name:"Jerry"}));
+          $("#profileMale").html(i18n._("<%name%> updated their profile", null, {name:"Jack"}, {gender:"male"}));
+          $("#profileFemale").html(i18n._("<%name%> updated their profile", null, {name:"Jill"}, {gender:"female"}));
+          $("#profileMaleFormatted").html(i18n._("<%link%><%name%><%endLink%> updated their <%link%>profile<%endLink%>", null, {name:"Jack", link:"<a href='#user/jack'>", endLink:"</a>"}, {gender:"male"}));
+          $("#profileFemaleFormatted").html(i18n._("<%link%><%name%><%endLink%> updated their <%link%>profile<%endLink%>", null, {name:"Jill", link:"<a href='#user/jack'>", endLink:"</a>"}, {gender:"female"}));
+        }
+
+        function loadLanguageFile(lang){
+          // i18n.languageFilePath = "http://roddeh.com/i18n/"
+          i18n.setLanguage(lang, function(){
+            console.log("language was set")
+            updateText();
+          })
+        }
+
+        
+
+        $("#english").on("click", function(event){
+          loadLanguageFile("en")
+        })
+        $("#japanese").on("click", function(event){
+          loadLanguageFile("ja")
+        })
+
+
+        loadLanguageFile("en")
+
+      });
+
+    </script>
+
+  </body>
+</html>

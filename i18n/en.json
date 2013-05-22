@@ -1,0 +1,47 @@
+{
+	"values":[
+		["Yes", "Yes"],
+		["No", "No"],
+		["Ok", "Ok"],
+		["Cancel", "Cancel"],
+		["Welcome <%name%>", "Welcome <%name%>"],
+		[
+			"%n comments",
+			[
+				[0, 0, "%n comments"],
+				[1, 1, "%n comment"],
+				[2, null, "%n comments"]
+			]
+		],
+		[
+			"Due in %n days",
+			[
+				[null, -2, "Due -%n days ago"],
+				[-1, -1, "Due Yesterday"],
+				[0, 0, "Due Today"],
+				[1, 1, "Due Tomorrow"],
+				[2, null, "Due in %n days"]
+			]
+		]
+	],
+	"contexts":[
+		{
+			"matches":{
+				"gender":"male"
+			},
+			"values":[
+				["<%name%> updated their profile", "<%name%> updated his profile"],
+				["<%link%><%name%><%endLink%> updated their <%link%>profile<%endLink%>", "<%link%><%name%><%endLink%> updated his <%link%>profile<%endLink%>"]
+			]
+		},
+		{
+			"matches":{
+				"gender":"female"
+			},
+			"values":[
+				["<%name%> updated their profile", "<%name%> updated her profile"],
+				["<%link%><%name%><%endLink%> updated their <%link%>profile<%endLink%>", "<%link%><%name%><%endLink%> updated her <%link%>profile<%endLink%>"]
+			]
+		}
+	]
+}
