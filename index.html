@@ -76,8 +76,9 @@
 
         function loadLanguageFile(lang){
           // i18n.languageFilePath = "http://roddeh.com/i18n/"
-          i18n.setLanguage(lang, function(){
+          i18n.setLanguage(lang, function(asdf){
             console.log("language was set")
+            console.log(i18n._("Yes"))
             updateText();
           })
         }
@@ -93,7 +94,6 @@
 
 
         loadLanguageFile("en")
-
       });
 
     </script>

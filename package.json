@@ -3,6 +3,7 @@
   "version":     "1.0.1",
   "description": "A simple utility to help with the internationalisation of your JS projects.",
   "author":      "Simon Rodwell",
+  "home_url":    "https://github.com/roddeh/lovely.io-i18n",
   "license":     "MIT",
   "tags":        "i18n, internationalisation, language, translation",
   "dependencies": {

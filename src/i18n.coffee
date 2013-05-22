@@ -25,18 +25,18 @@ class i18n
     setLanguage: (languageCode, callback) ->
       @currentLanguage = languageCode
       @loadLanguageFile(@appPackage, @currentLanguage, callback)
-      for pkg in packages
+      for pkg in @packages
         loadLanguageFile(pkg, @currentLanguage, pkg.details.handleLanguageChange)
 
     addPackage: (pkg) ->
-      packages[pkg.name] = {
-        details:package,
+      @packages[pkg.name] = {
+        details:pkg,
         data: null
       }
       loadLanguageFile(pkg, @currentLanguage, pkg.handleLanguageChange) if (@currentLanguage?)
 
     removePackage: (pkg) ->
-      packages[pkg.name] = null
+      @packages[pkg.name] = null
 
     #
     # Loads a language file 
@@ -46,20 +46,22 @@ class i18n
     # @param {String} A default language to fall back to if the first language fails
     #
     loadLanguageFile: (pkg, languageCode, callback) ->
-      ajax.get("#{ pkg.languageFilePath + languageCode }.json", {
+      ajax.get("#{ pkg.details.languageFilePath + languageCode }.json", {
         success: (response) =>
           data = response.ajax.responseJSON
-          @data = data.values
-          @contexts = data.contexts
+          con.log("data", data)
+          # @data = data.values
+          # @contexts = data.contexts
+          pkg.data = data
           callback(@) if callback?
-        failture: () =>
-          if defaultLanguage? and languageCode != defaultLanguage
-            @loadLanguageFile(defaultLanguage, callback)
-          else
-            console.error("Unable to load the specified language or the default language")
-            @data = null
-            @contexts = null
-            callback(@)
+        failure: () =>
+          # if defaultLanguage? and languageCode != defaultLanguage
+            # @loadLanguageFile(defaultLanguage, callback)
+          # else
+          console.error("Unable to load the specified language or the default language")
+            # @data = null
+            # @contexts = null
+          callback(@)
       })
 
     #
@@ -71,16 +73,18 @@ class i18n
     # @param {Object} Set of key value pairs to provide the context when translating
     #
     _: (text, num, formatting, context = @globalContext, packageName) ->
-      # If we have failed to load any language files simply use the supplied text.
-      return @useOriginalText(text, num, formatting) unless i18n.data?
       # Use the global data
-      data = @data
+      pkg = @packages[packageName] if packageName?
+      pkg = @appPackage unless pkg?
+      data = pkg.data
+      # If we have failed to find any language data simply use the supplied text.
+      return @useOriginalText(text, num, formatting) unless data?
       # Try to get a result using the current context
-      contextData = @getContextData(context)
+      contextData = @getContextData(data, context)
       # con.log(contextData)
       result = @__(text, num, formatting, contextData.values) if contextData?
       # If we didn't get a result with the context then use the non-contextual values
-      result = @__(text, num, formatting, i18n.data) unless result?
+      result = @__(text, num, formatting, data.values) unless result?
       # If we still didn't get a result then use the original text
       return @useOriginalText(text, num, formatting) unless result?
       # Otherwise we got a result so lets use it.
@@ -120,8 +124,9 @@ class i18n
                   return @applyFormatting(result.replace("%n", String(num)), num, formatting)
       return null
 
-    getContextData: (context) ->
-      for c in @contexts
+    getContextData: (data, context) ->
+      return null unless data.contexts?
+      for c in data.contexts
         equal = true
         for key, value of c.matches
           equal = equal and value is context[key]
