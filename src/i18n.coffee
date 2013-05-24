@@ -15,8 +15,7 @@ class i18n
     # Default object to handle the "global" package for the application
     appPackage:
       details:
-        name: null      
-        languageFilePath: "/i18n/"
+        getLanguageFilePath: () -> return "/i18n/"
         supportsLanguage: () -> return true
         handleLanguageChange: () -> return false
       data: null
@@ -25,15 +24,18 @@ class i18n
     setLanguage: (languageCode, callback) ->
       @currentLanguage = languageCode
       @loadLanguageFile(@appPackage, @currentLanguage, callback)
-      for pkg in @packages
-        loadLanguageFile(pkg, @currentLanguage, pkg.details.handleLanguageChange)
+      for name, pkg of @packages
+        @loadLanguageFile(pkg, @currentLanguage, pkg.details.handleLanguageChange) if pkg.details.supportsLanguage(@currentLanguage)
 
-    addPackage: (pkg) ->
-      @packages[pkg.name] = {
-        details:pkg,
+    addPackage: (p, name) ->
+      pkg = {
+        name: name
+        details:p,
         data: null
       }
-      loadLanguageFile(pkg, @currentLanguage, pkg.handleLanguageChange) if (@currentLanguage?)
+      @packages[name] = pkg
+      if @currentLanguage? and pkg.details.supportsLanguage(@currentLanguage)
+        loadLanguageFile(pkg, @currentLanguage, pkg.details.handleLanguageChange)
 
     removePackage: (pkg) ->
       @packages[pkg.name] = null
@@ -46,22 +48,20 @@ class i18n
     # @param {String} A default language to fall back to if the first language fails
     #
     loadLanguageFile: (pkg, languageCode, callback) ->
-      ajax.get("#{ pkg.details.languageFilePath + languageCode }.json", {
+      ajax.get("#{ pkg.details.getLanguageFilePath() + languageCode }.json", {
         success: (response) =>
           data = response.ajax.responseJSON
-          con.log("data", data)
           # @data = data.values
           # @contexts = data.contexts
           pkg.data = data
-          callback(@) if callback?
+          callback.apply(pkg.details, [@]) if callback?
         failure: () =>
           # if defaultLanguage? and languageCode != defaultLanguage
             # @loadLanguageFile(defaultLanguage, callback)
           # else
-          console.error("Unable to load the specified language or the default language")
             # @data = null
             # @contexts = null
-          callback(@)
+          callback.apply(null, [@])
       })
 
     #
@@ -72,6 +72,10 @@ class i18n
     # @param {Object} Set of key value pairs to be interpolated into the text
     # @param {Object} Set of key value pairs to provide the context when translating
     #
+
+    translate: (text, num, formatting, context = @globalContext, packageName) ->
+      @_(text, num, formatting, context = @globalContext, packageName)
+
     _: (text, num, formatting, context = @globalContext, packageName) ->
       # Use the global data
       pkg = @packages[packageName] if packageName?
@@ -89,6 +93,10 @@ class i18n
       return @useOriginalText(text, num, formatting) unless result?
       # Otherwise we got a result so lets use it.
       return result
+
+    translateHash: (hash, context, packageName) ->
+      hash[k] = @_(v, null, null, context, packageName) for k, v of hash
+      return hash
 
     #
     # Sets the global context for a given key
