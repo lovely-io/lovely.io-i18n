@@ -1,0 +1,6 @@
+2013-05-27 Simon Rodwell
+
+  * Version 1.1.1 release
+  * Refactored to allow for better integration with other lovely.io packages
+  * Removed dependency on ajax. Language files can be externally loaded and passed to i18n if required
+  * Fixed bugs with clearing data

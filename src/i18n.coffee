@@ -26,11 +26,12 @@ i18n.data = null
 # Adds key/value pair data and context that are to be used when translating text.
 #
 # @param {Object} The language data:
-#  {
-# "values":[
-#   "Yes":"はい"
-#   "No":"いいえ"
-# ]
+# {
+#   "values":[
+#     "Yes":"はい"
+#     "No":"いいえ"
+#   ]
+# }
 # For a more complete example see: http://roddeh.com/i18n/ja.json
 i18n.addData = (d) ->
   if(d.values?)
@@ -45,15 +46,15 @@ i18n.addData = (d) ->
 # @param {String} The key for the context e.g. "gender"
 # @param {Mixed} The value for the context e.g. "female"
 # 
-setContext = (key, value) ->
-  @globalContext[context] = value
+i18n.setContext = (key, value) ->
+  i18n.globalContext[key] = value
 
 # 
 # Clears the context for the given key
 # @param {String} The key to clear
 # 
-clearContext = (key) ->
-  @globalContext[context] = null    
+i18n.clearContext = (key) ->
+  i18n.globalContext[key] = null    
 
 # 
 # Destroys all translation and context data.
@@ -80,7 +81,7 @@ i18n.resetContext = () ->
 # @param {Object} Context to be used when translating the hash values
 # 
 i18n.translateHash = (hash, context) ->
-  hash[k] = i18n.translate(v, null, null, context) for k, v of hash
+  hash[k] = i18n.translate(v, null, null, context) for k, v of hash when typeof v is "string"
   return hash
 
 # 
