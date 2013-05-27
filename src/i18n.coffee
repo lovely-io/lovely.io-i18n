@@ -4,154 +4,134 @@
 # Copyright (C) 2013 Simon Rodwell
 #
 
-class i18n
+# 
+# Translates the supplied text based on the translation data that has been provided.
+# Defaults to the text that was supplied if no matching translation can be found.
+# @param {String} The text to be translated
+# @param {Object} Additional options to be used when translating
+#   num - The number to be used for pluralisation
+#   formating - Any replacements to be used when formatting the string
+#   context - An alternative context to be used in place of the globalContext.
+# @returns {String} The translated and formatted string.
+# 
+i18n = (text, options = {}) ->
+  {num, formatting, context} = options
+  context || (context = @globalContext)
+  return i18n.translate(text, num, formatting, context)
 
-  extend:
+i18n.globalContext = null
+i18n.data = null
 
-    currentLanguage: null
-    globalContext:{}
-    packages:{}
+#
+# Adds key/value pair data and context that are to be used when translating text.
+#
+# @param {Object} The language data:
+#  {
+# "values":[
+#   "Yes":"はい"
+#   "No":"いいえ"
+# ]
+# For a more complete example see: http://roddeh.com/i18n/ja.json
+i18n.addData = (d) ->
+  for v in d.values
+    i18n.data.values.push(v)
+  for c in d.contexts
+    i18n.data.contexts.push(c)
 
-    # Default object to handle the "global" package for the application
-    appPackage:
-      details:
-        getLanguageFilePath: () -> return "/i18n/"
-        supportsLanguage: () -> return true
-        handleLanguageChange: () -> return false
-      data: null
+# 
+# Sets the context globally.  This context will be used when translating all strings unless a different context is provided when calling i18n()
+# @param {String} The key for the context e.g. "gender"
+# @param {Mixed} The value for the context e.g. "female"
+# 
+setContext = (key, value) ->
+  @globalContext[context] = value
 
+# 
+# Clears the context for the given key
+# @param {String} The key to clear
+# 
+clearContext = (key) ->
+  @globalContext[context] = null    
 
-    setLanguage: (languageCode, callback) ->
-      @currentLanguage = languageCode
-      @loadLanguageFile(@appPackage, @currentLanguage, callback)
-      for name, pkg of @packages
-        @loadLanguageFile(pkg, @currentLanguage, pkg.details.handleLanguageChange) if pkg.details.supportsLanguage(@currentLanguage)
+# 
+# Destroys all translation and context data.
+# 
+i18n.reset = () ->
+  i18n.data = {values:[], contexts:[]}
+  i18n.globalContext = {}
 
-    addPackage: (p, name) ->
-      pkg = {
-        name: name
-        details:p,
-        data: null
-      }
-      @packages[name] = pkg
-      if @currentLanguage? and pkg.details.supportsLanguage(@currentLanguage)
-        loadLanguageFile(pkg, @currentLanguage, pkg.details.handleLanguageChange)
+# 
+# Destroys all translation data.  Useful for when you change languages
+# 
+i18n.resetData = () ->
+  i18n.data = {values:[], contexts:[]}
 
-    removePackage: (pkg) ->
-      @packages[pkg.name] = null
+# 
+# Destroys all context data.  
+# 
+i18n.resetContext = () ->
+  i18n.globalContext = {}
 
-    #
-    # Loads a language file 
-    #
-    # @param {String} The language code for the language file that you would like to load
-    # @param {String} Callback when the language file has loaded or fails to load
-    # @param {String} A default language to fall back to if the first language fails
-    #
-    loadLanguageFile: (pkg, languageCode, callback) ->
-      ajax.get("#{ pkg.details.getLanguageFilePath() + languageCode }.json", {
-        success: (response) =>
-          data = response.ajax.responseJSON
-          # @data = data.values
-          # @contexts = data.contexts
-          pkg.data = data
-          callback.apply(pkg.details, [@]) if callback?
-        failure: () =>
-          # if defaultLanguage? and languageCode != defaultLanguage
-            # @loadLanguageFile(defaultLanguage, callback)
-          # else
-            # @data = null
-            # @contexts = null
-          callback.apply(null, [@])
-      })
+# 
+# Translates all the keys in a hash.  Useful for translating the i18n propety that exists for some lovely.io packages.
+# @param {Object} Hash containing the strings to be translated
+# @param {Object} Context to be used when translating the hash values
+# 
+i18n.translateHash = (hash, context) ->
+  hash[k] = i18n.translate(v, null, null, context) for k, v of hash
+  return hash
 
-    #
-    # Translates the given text to the language that has been loaded.
-    #
-    # @param {String} The text to be translated
-    # @param {Number} The number to be used in case of pluralisation
-    # @param {Object} Set of key value pairs to be interpolated into the text
-    # @param {Object} Set of key value pairs to provide the context when translating
-    #
+# 
+# Private
+# 
+i18n.translate = (text, num, formatting, context = @globalContext) ->
+  data = i18n.data
+  # If we have failed to find any language data simply use the supplied text.
+  return i18n.useOriginalText(text, num, formatting) unless data?
+  # Try to get a result using the current context
+  contextData = i18n.getContextData(data, context)
+  result = i18n.findTranslation(text, num, formatting, contextData.values) if contextData?
+  # If we didn't get a result with the context then use the non-contextual values
+  result = i18n.findTranslation(text, num, formatting, data.values) unless result?
+  # If we still didn't get a result then use the original text
+  return i18n.useOriginalText(text, num, formatting) unless result?
+  # Otherwise we got a result so lets use it.
+  return result
 
-    translate: (text, num, formatting, context = @globalContext, packageName) ->
-      @_(text, num, formatting, context = @globalContext, packageName)
+i18n.findTranslation = (text, num, formatting, data) ->
+  # If we have a complete data set then lets find the correct translation.
+  for pair in data
+    return null unless pair?
+    if pair[0] is text
+      unless num?
+        return i18n.applyFormatting(pair[1], num, formatting) if typeof pair[1] is "string"
+      else
+        if isArray(pair[1])
+          for triple in pair[1]
+            if((num >= triple[0] || triple[0] is null) and (num <= triple[1] || triple[1] is null))
+              result = i18n.applyFormatting(triple[2].replace("-%n", String(-num)), num, formatting)
+              return i18n.applyFormatting(result.replace("%n", String(num)), num, formatting)
+  return null  
 
-    _: (text, num, formatting, context = @globalContext, packageName) ->
-      # Use the global data
-      pkg = @packages[packageName] if packageName?
-      pkg = @appPackage unless pkg?
-      data = pkg.data
-      # If we have failed to find any language data simply use the supplied text.
-      return @useOriginalText(text, num, formatting) unless data?
-      # Try to get a result using the current context
-      contextData = @getContextData(data, context)
-      # con.log(contextData)
-      result = @__(text, num, formatting, contextData.values) if contextData?
-      # If we didn't get a result with the context then use the non-contextual values
-      result = @__(text, num, formatting, data.values) unless result?
-      # If we still didn't get a result then use the original text
-      return @useOriginalText(text, num, formatting) unless result?
-      # Otherwise we got a result so lets use it.
-      return result
+i18n.getContextData = (data, context) ->
+  return null unless data.contexts?
+  for c in data.contexts
+    equal = true
+    for key, value of c.matches
+      equal = equal and value is context[key]
+    return c if equal
+  return null
 
-    translateHash: (hash, context, packageName) ->
-      hash[k] = @_(v, null, null, context, packageName) for k, v of hash
-      return hash
+i18n.useOriginalText = (text, num, formatting) ->
+  return i18n.applyFormatting(text, num, formatting) unless num?
+  return i18n.applyFormatting(text.replace("%n", String(num)), num, formatting)
 
-    #
-    # Sets the global context for a given key
-    #
-    # @param {String} Key for the context you are setting
-    # @param {String} Value for the context you are setting
-    # 
-    setContext: (context, value) ->
-      @globalContext[context] = value
+i18n.applyFormatting = (text, num, formatting) ->
+  for ind of formatting
+    regex = new RegExp("<%#{ ind }%>", "g")
+    text = text.replace(regex, formatting[ind])
+  return text;
 
-    #
-    # Sets the global context for a given key
-    #
-    # @param {String} Key for the context you are setting
-    # 
-    clearContext: (context) ->
-      @globalContext[context] = null  
+i18n.reset()
 
-    # private 
-
-    __: (text, num, formatting, data) ->
-      # If we have a complete data set then lets find the correct translation.
-      for pair in data
-        return null unless pair?
-        if pair[0] is text
-          unless num?
-            return @applyFormatting(pair[1], num, formatting) if typeof pair[1] is "string"
-          else
-            if isArray(pair[1])
-              for triple in pair[1]
-                if((num >= triple[0] || triple[0] is null) and (num <= triple[1] || triple[1] is null))
-                  result = @applyFormatting(triple[2].replace("-%n", String(-num)), num, formatting)
-                  return @applyFormatting(result.replace("%n", String(num)), num, formatting)
-      return null
-
-    getContextData: (data, context) ->
-      return null unless data.contexts?
-      for c in data.contexts
-        equal = true
-        for key, value of c.matches
-          equal = equal and value is context[key]
-        return c if equal
-      return null
-
-    useOriginalText: (text, num, formatting) ->
-      return @applyFormatting(text, num, formatting) unless num?
-      return @applyFormatting(text.replace("%n", String(num)), num, formatting)
-
-    applyFormatting: (text, num, formatting) ->
-      for ind of formatting
-        regex = new RegExp("<%#{ ind }%>", "g")
-        text = text.replace(regex, formatting[ind])
-      return text;
-
-  constructor: () ->
-    throw new Error("i18n is designed to work as a singleton.")
-
-  # return @
+exports = i18n
