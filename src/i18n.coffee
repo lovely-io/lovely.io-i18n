@@ -33,10 +33,12 @@ i18n.data = null
 # ]
 # For a more complete example see: http://roddeh.com/i18n/ja.json
 i18n.addData = (d) ->
-  for v in d.values
-    i18n.data.values.push(v)
-  for c in d.contexts
-    i18n.data.contexts.push(c)
+  if(d.values?)
+    for v in d.values
+      i18n.data.values.push(v)
+  if(d.contexts?)
+    for c in d.contexts
+      i18n.data.contexts.push(c)
 
 # 
 # Sets the context globally.  This context will be used when translating all strings unless a different context is provided when calling i18n()

@@ -77,7 +77,7 @@
         function loadLanguageFile(languageCode){
           i18n.reset()
           // ajax.get("/i18n/" + languageCode + ".json", {
-          ajax.get("/i18n/" + languageCode + ".json", {
+          ajax.get("http://roddeh.com/i18n/" + languageCode + ".json", {
             success: function (response){
               data = response.ajax.responseJSON
               i18n.addData(data)

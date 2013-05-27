@@ -1,7 +1,7 @@
 {
   "name":        "i18n",
-  "version":     "1.0.1",
-  "description": "A simple utility to help with the internationalisation of your JS projects.",
+  "version":     "1.1.1",
+  "description": "A simple utility to help with the internationalisation of your lovel.io projects.",
   "author":      "Simon Rodwell",
   "home_url":    "https://github.com/roddeh/lovely.io-i18n",
   "license":     "MIT",
