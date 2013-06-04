@@ -8,22 +8,20 @@
 # Translates the supplied text based on the translation data that has been provided.
 # Defaults to the text that was supplied if no matching translation can be found.
 # @param {String} The text to be translated
-# @param {Object} Additional options to be used when translating
-#   num - The number to be used for pluralisation
-#   formating - Any replacements to be used when formatting the string
-#   context - An alternative context to be used in place of the globalContext.
+# @param {Number} The number to be used for pluralisation
+# @param {Object} Any replacements to be used when formatting the string
+# @param {Object} An alternative context to be used in place of the globalContext.
 # @returns {String} The translated and formatted string.
 # 
-i18n = (text, options = {}) ->
-  {num, formatting, context} = options
-  context || (context = @globalContext)
+# i18n = (text, options = {}) ->
+i18n = (text, num, formatting, context = @globalContext) ->
   return i18n.translate(text, num, formatting, context)
 
 i18n.globalContext = null
 i18n.data = null
 
 #
-# Adds key/value pair data and context that are to be used when translating text.
+# Adds key/value pair data and contexts that are to be used when translating text.
 #
 # @param {Object} The language data:
 # {
@@ -32,11 +30,11 @@ i18n.data = null
 #     "No":"いいえ"
 #   ]
 # }
-# For a more complete example see: http://roddeh.com/i18n/ja.json
-i18n.addData = (d) ->
+# For a more complete example see: http://i18njs/i18n/ja.json
+i18n.add = (d) ->
   if(d.values?)
-    for v in d.values
-      i18n.data.values.push(v)
+    for k, v of d.values
+      i18n.data.values[k] = v;
   if(d.contexts?)
     for c in d.contexts
       i18n.data.contexts.push(c)
@@ -102,18 +100,16 @@ i18n.translate = (text, num, formatting, context = @globalContext) ->
   return result
 
 i18n.findTranslation = (text, num, formatting, data) ->
-  # If we have a complete data set then lets find the correct translation.
-  for pair in data
-    return null unless pair?
-    if pair[0] is text
-      unless num?
-        return i18n.applyFormatting(pair[1], num, formatting) if typeof pair[1] is "string"
-      else
-        if isArray(pair[1])
-          for triple in pair[1]
-            if((num >= triple[0] || triple[0] is null) and (num <= triple[1] || triple[1] is null))
-              result = i18n.applyFormatting(triple[2].replace("-%n", String(-num)), num, formatting)
-              return i18n.applyFormatting(result.replace("%n", String(num)), num, formatting)
+  value = data[text]
+  return null unless value?
+  unless num?
+    return i18n.applyFormatting(value, num, formatting) if typeof value is "string"
+  else
+    if isArray(value)
+      for triple in value
+        if((num >= triple[0] || triple[0] is null) and (num <= triple[1] || triple[1] is null))
+          result = i18n.applyFormatting(triple[2].replace("-%n", String(-num)), num, formatting)
+          return i18n.applyFormatting(result.replace("%n", String(num)), num, formatting)
   return null  
 
 i18n.getContextData = (data, context) ->
@@ -131,7 +127,8 @@ i18n.useOriginalText = (text, num, formatting) ->
 
 i18n.applyFormatting = (text, num, formatting) ->
   for ind of formatting
-    regex = new RegExp("<%#{ ind }%>", "g")
+    # regex = new RegExp("<%#{ ind }%>", "g")
+    regex = new RegExp("%{#{ ind }}", "g")
     text = text.replace(regex, formatting[ind])
   return text;
 

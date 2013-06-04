@@ -50,37 +50,36 @@
 
     <script type="text/javascript">
       Lovely(["dom", "i18n", "ajax"], function($, i18n, ajax){
-
         function updateText(){
           $("#yes").html(i18n("Yes"));
           $("#no").html(i18n("No"));
           $("#ok").html(i18n("Ok"));
           $("#cancel").html(i18n("Cancel"));
-          $("#comment0").html(i18n("%n comments", {num:0}));
-          $("#comment1").html(i18n("%n comments", {num:1}));
-          $("#comment2").html(i18n("%n comments", {num:2}));
-          $("#due3").html(i18n("Due in %n days", {num:3}));
-          $("#due2").html(i18n("Due in %n days", {num:2}));
-          $("#due1").html(i18n("Due in %n days", {num:1}));
-          $("#due0").html(i18n("Due in %n days", {num:0}));
-          $("#due-1").html(i18n("Due in %n days", {num:-1}));
-          $("#due-2").html(i18n("Due in %n days", {num:-2}));
-          $("#due-3").html(i18n("Due in %n days", {num:-3}));
-          $("#welcome1").html(i18n("Welcome <%name%>", {formatting:{name:"Tom"}}));
-          $("#welcome2").html(i18n("Welcome <%name%>", {formatting:{name:"Jerry"}}));
-          $("#profileMale").html(i18n("<%name%> updated their profile", {formatting:{name:"Jack"}, context:{gender:"male"}}));
-          $("#profileFemale").html(i18n("<%name%> updated their profile", {formatting:{name:"Jill"}, context:{gender:"female"}}));
-          $("#profileMaleFormatted").html(i18n("<%link%><%name%><%endLink%> updated their <%link%>profile<%endLink%>", {formatting:{name:"Jack", link:"<a href='#user/jack'>", endLink:"</a>"}, context:{gender:"male"}}));
-          $("#profileFemaleFormatted").html(i18n("<%link%><%name%><%endLink%> updated their <%link%>profile<%endLink%>", {formatting:{name:"Jill", link:"<a href='#user/jack'>", endLink:"</a>"}, context:{gender:"female"}}));
+          $("#comment0").html(i18n("%n comments", 0));
+          $("#comment1").html(i18n("%n comments", 1));
+          $("#comment2").html(i18n("%n comments", 2));
+          $("#due3").html(i18n("Due in %n days", 3));
+          $("#due2").html(i18n("Due in %n days", 2));
+          $("#due1").html(i18n("Due in %n days", 1));
+          $("#due0").html(i18n("Due in %n days", 0));
+          $("#due-1").html(i18n("Due in %n days", -1));
+          $("#due-2").html(i18n("Due in %n days", -2));
+          $("#due-3").html(i18n("Due in %n days", -3));
+          $("#welcome1").html(i18n("Welcome %{name}", null, {name:"Tom"}));
+          $("#welcome2").html(i18n("Welcome %{name}", null, {name:"Jerry"}));
+          $("#profileMale").html(i18n("%{name} updated their profile", null, {name:"Jack"}, {gender:"male"}));
+          $("#profileFemale").html(i18n("%{name} updated their profile", null, {name:"Jill"}, {gender:"female"}));
+          $("#profileMaleFormatted").html(i18n("%{link}%{name}%{endLink} updated their %{link}profile%{endLink}", null, {name:"Jack", link:"<a href='#user/jack'>", endLink:"</a>"}, {gender:"male"}));
+          $("#profileFemaleFormatted").html(i18n("%{link}%{name}%{endLink} updated their %{link}profile%{endLink}", null, {name:"Jill", link:"<a href='#user/jack'>", endLink:"</a>"}, {gender:"female"}));
         }
 
         function loadLanguageFile(languageCode){
           i18n.reset()
-          // ajax.get("/i18n/" + languageCode + ".json", {
-          ajax.get("http://roddeh.com/i18n/" + languageCode + ".json", {
+          ajax.get("/i18n/" + languageCode + ".json", {
+          //ajax.get("http://roddeh.com/i18n/" + languageCode + ".json", {
             success: function (response){
               data = response.ajax.responseJSON
-              i18n.addData(data)
+              i18n.add(data)
               updateText();
             }
           })

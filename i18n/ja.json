@@ -1,49 +1,43 @@
 {
-	"values":[
-		["Yes", "はい"],
-		["No", "いいえ"],
-		["Ok", "Ok"],
-		["Cancel", "キャンセル"],
-		["Welcome %name", "ようこそ %name"],
-		[
-			"%n comments",
-			[
-				[0, 0, "%n コメント"],
-				[1, 1, "%n コメント"],
-				[2, null, "%n コメント"]
-			]
-		],
-		[
-			"Due in %n days",
-			[
-				[null, -3, "-%n日前までに締め切り"],
-				[-2, -2, "おとといまでに締め切り"],
-				[-1, -1, "昨日までに締め切り"],
-				[0, 0, "今日までに締め切り"],
-				[1, 1, "明日までに締め切り"],
-				[2, 2, "明後日までに締め切り"],
-				[3, null, "%n日後までに締め切り"]
-			]
-		]
-	],
-	"contexts":[
-		{
-			"matches":{
-				"gender":"male"
-			},
-			"values":[
-				["<%name%> updated their profile", "<%name%>は彼のプロフィールを更新し"],
-				["<%link%><%name%><%endLink%> updated their <%link%>profile<%endLink%>", "<%link%><%name%><%endLink%>は彼の<%link%>プロフィール<%endLink%>を更新し"]
-			]
-		},
-		{
-			"matches":{
-				"gender":"female"
-			},
-			"values":[
-				["<%name%> updated their profile", "<%name%>は彼女のプロフィールを更新し"],
-				["<%link%><%name%><%endLink%> updated their <%link%>profile<%endLink%>", "<%link%><%name%><%endLink%>は彼女の<%link%>プロフィール<%endLink%>を更新し"]
-			]
-		}
-	]
+  "values":{
+    "Yes": "はい",
+    "No": "いいえ",
+    "Ok": "Ok",
+    "Cancel": "キャンセル",
+    "Welcome %name": "ようこそ %name",
+    "%n comments":[
+      [0, 0, "%n コメント"],
+      [1, 1, "%n コメント"],
+      [2, null, "%n コメント"]
+    ],
+    "Due in %n days":[
+      [null, -3, "-%n日前までに締め切り"],
+      [-2, -2, "おとといまでに締め切り"],
+      [-1, -1, "昨日までに締め切り"],
+      [0, 0, "今日までに締め切り"],
+      [1, 1, "明日までに締め切り"],
+      [2, 2, "明後日までに締め切り"],
+      [3, null, "%n日後までに締め切り"]
+    ]
+  },
+  "contexts":[
+    {
+      "matches":{
+        "gender":"male"
+      },
+      "values":{
+        "%{name} updated their profile": "%{name}は彼のプロフィールを更新し",
+        "%{link}%{name}%{endLink} updated their %{link}profile%{endLink}": "%{link}%{name}%{endLink}は彼の%{link}プロフィール%{endLink}を更新し"
+      }
+    },
+    {
+      "matches":{
+        "gender":"female"
+      },
+      "values":{
+        "%{name} updated their profile": "%{name}は彼女のプロフィールを更新し",
+        "%{link}%{name}%{endLink} updated their %{link}profile%{endLink}": "%{link}%{name}%{endLink}は彼女の%{link}プロフィール%{endLink}を更新し"
+      }
+    }
+  ]
 }
