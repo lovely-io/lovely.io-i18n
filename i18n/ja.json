@@ -4,7 +4,7 @@
     "No": "いいえ",
     "Ok": "Ok",
     "Cancel": "キャンセル",
-    "Welcome %name": "ようこそ %name",
+    "Welcome %{name}": "ようこそ %{name}",
     "%n comments":[
       [0, 0, "%n コメント"],
       [1, 1, "%n コメント"],

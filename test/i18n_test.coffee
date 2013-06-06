@@ -18,101 +18,92 @@ describe "i18n", ->
     assert.ok i18n.version
 
   it "should return the original key when no data is present", ->
-    assert.equal("Ok", i18n("Ok"))
+    assert.equal(i18n("Ok"), "Ok")
 
   it "should apply pluralisations even when no data is present", ->
-    assert.equal("0 Comments", i18n("%n Comments", {num:0}))
+    assert.equal(i18n("%n Comments", 0), "0 Comments")
 
   it "should apply formatting even when no data is present", ->
-    assert.equal("Hi, Bob", i18n("Hi, <%name%>", {formatting:{name:"Bob"}}))
+    assert.equal(i18n("Hi, %{name}", null, {name:"Bob"}), "Hi, Bob")
 
-  describe "addData", ->
+  describe "add", ->
     it "should receive data containing values and/or contexts", ->
-      i18n.addData({
-        "values":[
-          ["Yes", "はい"]
-          ["No", "いいえ"]
-          ["Welcome %name", "ようこそ %name"]
-          [
-            "%n comments"
-            [
-              [0, 0, "%n コメント"]
-              [1, 1, "%n コメント"]
-              [2, null, "%n コメント"]
-            ]
-          ]
-          [
-            "Due in %n days"
-            [
-              [null, -3, "-%n日前までに締め切り"]
-              [-2, -2, "おとといまでに締め切り"]
-              [-1, -1, "昨日までに締め切り"]
-              [0, 0, "今日までに締め切り"]
-              [1, 1, "明日までに締め切り"]
-              [2, 2, "明後日までに締め切り"]
-              [3, null, "%n日後までに締め切り"]
-            ]
-          ]
-          ["<%name%> updated their profile", "<%name%>はプロフィールを更新し"]
-        ],
+      i18n.add({
+        "values":{
+          "Yes": "はい",
+          "No": "いいえ",
+          "Welcome %{name}": "ようこそ %{name}",
+          "%n comments":[
+            [0, 0, "%n コメント"],
+            [1, 1, "%n コメント"],
+            [2, null, "%n コメント"]
+          ],
+          "Due in %n days":[
+            [null, -3, "-%n日前までに締め切り"],
+            [-2, -2, "おとといまでに締め切り"],
+            [-1, -1, "昨日までに締め切り"],
+            [0, 0, "今日までに締め切り"],
+            [1, 1, "明日までに締め切り"],
+            [2, 2, "明後日までに締め切り"],
+            [3, null, "%n日後までに締め切り"]
+          ],
+          "%{name} updated their profile": "%{name}はプロフィールを更新し",
+        },
         "contexts":[
           {
             "matches":{
               "gender":"male"
             },
-            "values":[
-              ["<%name%> updated their profile", "<%name%>は彼のプロフィールを更新し"]
-              ["<%link%><%name%><%endLink%> updated their <%link%>profile<%endLink%>", "<%link%><%name%><%endLink%>は彼の<%link%>プロフィール<%endLink%>を更新し"]
-            ]
+            "values":{
+              "%{name} updated their profile": "%{name}は彼のプロフィールを更新し",
+              "%{link}%{name}%{endLink} updated their %{link}profile%{endLink}": "%{link}%{name}%{endLink}は彼の%{link}プロフィール%{endLink}を更新し"
+            }
           }
         ]
       })
     
     it "should receive data containing just values", ->
-      i18n.addData({
-        values:[
-          ["Ok", "Ok"]
-          ["Cancel", "キャンセル"]
-        ]
+      i18n.add({
+        values:{
+          "Ok": "Ok",
+          "Cancel": "キャンセル"
+        }
       })
 
     it "should receive data containing just contexts", ->
-      i18n.addData({
+      i18n.add({
         contexts:[
           {
             "matches":{
               "gender":"female"
+            },
+            "values":{
+              "%{name} updated their profile": "%{name}は彼女のプロフィールを更新し",
+              "%{link}%{name}%{endLink} updated their %{link}profile%{endLink}": "%{link}%{name}%{endLink}は彼女の%{link}プロフィール%{endLink}を更新し"
             }
-            "values":[
-              ["<%name%> updated their profile", "<%name%>は彼女のプロフィールを更新し"]
-              ["<%link%><%name%><%endLink%> updated their <%link%>profile<%endLink%>", "<%link%><%name%><%endLink%>は彼女の<%link%>プロフィール<%endLink%>を更新し"]
-            ]
           }
         ]
       })
 
     it "should translate simple text.", ->
-      assert.equal("はい", i18n("Yes"))
+      assert.equal(i18n("Yes"), "はい")
 
     it "should use contexts when provided", ->
-      assert.equal("Bobは彼のプロフィールを更新し", i18n("<%name%> updated their profile", {formatting:{name:"Bob"}, context:{gender:"male"}}))
-
-    it "should use contexts when provided", ->
-      assert.equal("Bobは彼のプロフィールを更新し", i18n("<%name%> updated their profile", {formatting:{name:"Bob"}, context:{gender:"male"}}))
+      assert.equal(i18n("%{name} updated their profile", null, {name:"Bob"}, {gender:"male"}), "Bobは彼のプロフィールを更新し")
 
     it "should default to the normal translations when no context is provided and global context is not set", ->
-      assert.equal("Bobはプロフィールを更新し", i18n("<%name%> updated their profile", {formatting:{name:"Bob"}}))
+      assert.equal(i18n("%{name} updated their profile", null, {name:"Bob"}), "Bobはプロフィールを更新し")
 
     it "should default to the global context when no context is set", ->
       i18n.setContext("gender", "female")
-      assert.equal("Janeは彼女のプロフィールを更新し", i18n("<%name%> updated their profile", {formatting:{name:"Jane"}}))
+      assert.equal(i18n("%{name} updated their profile", null, {name:"Jane"}), "Janeは彼女のプロフィールを更新し")
 
     it "should use the provided context to override the global", ->
-      assert.equal("Bobは彼のプロフィールを更新し", i18n("<%name%> updated their profile", {formatting:{name:"Bob"}, context:{gender:"male"}}))
+      assert.equal(i18n("%{name} updated their profile", null, {name:"Bob"}, {gender:"male"}), "Bobは彼のプロフィールを更新し")
 
     it "should revert to the normal translation after the global context is cleared and no contexts are provided", ->
       i18n.clearContext("gender")
-      assert.equal("Bobはプロフィールを更新し", i18n("<%name%> updated their profile", {formatting:{name:"Bob"}}))
+      assert.equal(i18n("%{name} updated their profile", null, {name:"Bob"}), "Bobはプロフィールを更新し")
 
     it "should translate all string properties in a given hash", ->
       hash = {

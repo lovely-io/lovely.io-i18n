@@ -30,7 +30,7 @@ i18n.data = null
 #     "No":"いいえ"
 #   ]
 # }
-# For a more complete example see: http://i18njs/i18n/ja.json
+# For a more complete example see: http://i18njs.com/i18n/ja.json
 i18n.add = (d) ->
   if(d.values?)
     for k, v of d.values
@@ -105,7 +105,7 @@ i18n.findTranslation = (text, num, formatting, data) ->
   unless num?
     return i18n.applyFormatting(value, num, formatting) if typeof value is "string"
   else
-    if isArray(value)
+    if (value instanceof Array)
       for triple in value
         if((num >= triple[0] || triple[0] is null) and (num <= triple[1] || triple[1] is null))
           result = i18n.applyFormatting(triple[2].replace("-%n", String(-num)), num, formatting)
