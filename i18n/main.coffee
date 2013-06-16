@@ -14,7 +14,6 @@ isArray = core.isArray
 # glue in your files
 include 'src/i18n'
 
-# export your objects in the module
-exports.version = '%{version}'
-
+i18n.reset()
 exports = i18n
+exports.version = '%{version}'

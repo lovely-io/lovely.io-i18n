@@ -4,7 +4,7 @@
 # Copyright (C) 2013 Simon Rodwell
 #
 
-# 
+#
 # Translates the supplied text based on the translation data that has been provided.
 # Defaults to the text that was supplied if no matching translation can be found.
 # @param {String} The text to be translated
@@ -12,7 +12,7 @@
 # @param {Object} Any replacements to be used when formatting the string
 # @param {Object} An alternative context to be used in place of the globalContext.
 # @returns {String} The translated and formatted string.
-# 
+#
 # i18n = (text, options = {}) ->
 i18n = (text, num, formatting, context = @globalContext) ->
   return i18n.translate(text, num, formatting, context)
@@ -39,52 +39,52 @@ i18n.add = (d) ->
     for c in d.contexts
       i18n.data.contexts.push(c)
 
-# 
+#
 # Sets the context globally.  This context will be used when translating all strings unless a different context is provided when calling i18n()
 # @param {String} The key for the context e.g. "gender"
 # @param {Mixed} The value for the context e.g. "female"
-# 
+#
 i18n.setContext = (key, value) ->
   i18n.globalContext[key] = value
 
-# 
+#
 # Clears the context for the given key
 # @param {String} The key to clear
-# 
+#
 i18n.clearContext = (key) ->
-  i18n.globalContext[key] = null    
+  i18n.globalContext[key] = null
 
-# 
+#
 # Destroys all translation and context data.
-# 
+#
 i18n.reset = () ->
   i18n.data = {values:[], contexts:[]}
   i18n.globalContext = {}
 
-# 
+#
 # Destroys all translation data.  Useful for when you change languages
-# 
+#
 i18n.resetData = () ->
   i18n.data = {values:[], contexts:[]}
 
-# 
-# Destroys all context data.  
-# 
+#
+# Destroys all context data.
+#
 i18n.resetContext = () ->
   i18n.globalContext = {}
 
-# 
+#
 # Translates all the keys in a hash.  Useful for translating the i18n propety that exists for some lovely.io packages.
 # @param {Object} Hash containing the strings to be translated
 # @param {Object} Context to be used when translating the hash values
-# 
+#
 i18n.translateHash = (hash, context) ->
   hash[k] = i18n.translate(v, null, null, context) for k, v of hash when typeof v is "string"
   return hash
 
-# 
+#
 # Private
-# 
+#
 i18n.translate = (text, num, formatting, context = @globalContext) ->
   data = i18n.data
   # If we have failed to find any language data simply use the supplied text.
@@ -110,7 +110,7 @@ i18n.findTranslation = (text, num, formatting, data) ->
         if((num >= triple[0] || triple[0] is null) and (num <= triple[1] || triple[1] is null))
           result = i18n.applyFormatting(triple[2].replace("-%n", String(-num)), num, formatting)
           return i18n.applyFormatting(result.replace("%n", String(num)), num, formatting)
-  return null  
+  return null
 
 i18n.getContextData = (data, context) ->
   return null unless data.contexts?
@@ -131,7 +131,3 @@ i18n.applyFormatting = (text, num, formatting) ->
     regex = new RegExp("%{#{ ind }}", "g")
     text = text.replace(regex, formatting[ind])
   return text;
-
-i18n.reset()
-
-exports = i18n
