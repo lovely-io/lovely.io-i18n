@@ -61,7 +61,7 @@ describe "i18n", ->
           }
         ]
       })
-    
+
     it "should receive data containing just values", ->
       i18n.add({
         values:{
@@ -123,6 +123,24 @@ describe "i18n", ->
       }
       i18n.translateHash(hash)
       assert.equal(hash.cancel, "キャンセル")
+
+    it "should translate hashes straight away", ->
+      hash = {
+        ok: "Ok"
+        cancel: "Cancel"
+      }
+      i18n(hash)
+      assert.equal(hash.cancel, "キャンセル")
+
+    it "should recognize the i18n keys on the hashes", ->
+      Widget = {
+        i18n: {
+          ok: "Ok"
+          cancel: "Cancel"
+        }
+      }
+      i18n(Widget)
+      assert.equal(Widget.i18n.cancel, "キャンセル")
 
     it "should go back to returning the key after the data has been reset", ->
       i18n.reset()

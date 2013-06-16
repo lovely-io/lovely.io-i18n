@@ -15,7 +15,11 @@
 #
 # i18n = (text, options = {}) ->
 i18n = (text, num, formatting, context = @globalContext) ->
-  return i18n.translate(text, num, formatting, context)
+  if isObject(text)
+    text = text['i18n'] if isObject(text['i18n'])
+    i18n.translateHash(text, num, formatting, context)
+  else
+    i18n.translate(text, num, formatting, context)
 
 i18n.globalContext = null
 i18n.data = null
