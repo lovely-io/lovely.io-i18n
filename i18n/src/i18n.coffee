@@ -14,7 +14,14 @@
 # @returns {String} The translated and formatted string.
 #
 # i18n = (text, options = {}) ->
-i18n = (text, num, formatting, context = @globalContext) ->
+i18n = (text, numOrformatting, formattingOrContext, context = @globalContext) ->
+  if isObject(numOrformatting)
+    formatting = numOrformatting
+    context = formattingOrContext || @globalContext
+  else
+    num = numOrformatting
+    formatting = formattingOrContext
+    context = context
   if isObject(text)
     text = text['i18n'] if isObject(text['i18n'])
     i18n.translateHash(text, num, formatting, context)
@@ -109,7 +116,7 @@ i18n.findTranslation = (text, num, formatting, data) ->
   unless num?
     return i18n.applyFormatting(value, num, formatting) if typeof value is "string"
   else
-    if (value instanceof Array)
+    if (value instanceof Array || value.length)
       for triple in value
         if((num >= triple[0] || triple[0] is null) and (num <= triple[1] || triple[1] is null))
           result = i18n.applyFormatting(triple[2].replace("-%n", String(-num)), num, formatting)

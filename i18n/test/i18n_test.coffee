@@ -24,7 +24,7 @@ describe "i18n", ->
     assert.equal(i18n("%n Comments", 0), "0 Comments")
 
   it "should apply formatting even when no data is present", ->
-    assert.equal(i18n("Hi, %{name}", null, {name:"Bob"}), "Hi, Bob")
+    assert.equal(i18n("Hi, %{name}", {name:"Bob"}), "Hi, Bob")
 
   describe "add", ->
     it "should receive data containing values and/or contexts", ->
@@ -56,7 +56,10 @@ describe "i18n", ->
             },
             "values":{
               "%{name} updated their profile": "%{name}は彼のプロフィールを更新し",
-              "%{link}%{name}%{endLink} updated their %{link}profile%{endLink}": "%{link}%{name}%{endLink}は彼の%{link}プロフィール%{endLink}を更新し"
+              "%{link}%{name}%{endLink} updated their %{link}profile%{endLink}": "%{link}%{name}%{endLink}は彼の%{link}プロフィール%{endLink}を更新し",
+              "%{name} added %n photos to their album":[
+                [0, null, "%{name}は彼のアルバムに写真%n枚を追加しました"]
+              ]
             }
           }
         ]
@@ -89,21 +92,41 @@ describe "i18n", ->
       assert.equal(i18n("Yes"), "はい")
 
     it "should use contexts when provided", ->
-      assert.equal(i18n("%{name} updated their profile", null, {name:"Bob"}, {gender:"male"}), "Bobは彼のプロフィールを更新し")
+      assert.equal(i18n("%{name} updated their profile", {name:"Bob"}, {gender:"male"}), "Bobは彼のプロフィールを更新し")
 
     it "should default to the normal translations when no context is provided and global context is not set", ->
-      assert.equal(i18n("%{name} updated their profile", null, {name:"Bob"}), "Bobはプロフィールを更新し")
+      assert.equal(i18n("%{name} updated their profile", {name:"Bob"}), "Bobはプロフィールを更新し")
 
     it "should default to the global context when no context is set", ->
       i18n.setContext("gender", "female")
-      assert.equal(i18n("%{name} updated their profile", null, {name:"Jane"}), "Janeは彼女のプロフィールを更新し")
+      assert.equal(i18n("%{name} updated their profile", {name:"Jane"}), "Janeは彼女のプロフィールを更新し")
 
     it "should use the provided context to override the global", ->
-      assert.equal(i18n("%{name} updated their profile", null, {name:"Bob"}, {gender:"male"}), "Bobは彼のプロフィールを更新し")
+      assert.equal(i18n("%{name} updated their profile", {name:"Bob"}, {gender:"male"}), "Bobは彼のプロフィールを更新し")
 
     it "should revert to the normal translation after the global context is cleared and no contexts are provided", ->
       i18n.clearContext("gender")
-      assert.equal(i18n("%{name} updated their profile", null, {name:"Bob"}), "Bobはプロフィールを更新し")
+      assert.equal(i18n("%{name} updated their profile", {name:"Bob"}), "Bobはプロフィールを更新し")
+
+    it "should handle the case of pluralisation, formatting and context.", ->
+      # i18n.add({
+      #   contexts:[
+      #     {
+      #       "matches":{
+      #         "gender":"male"
+      #       },
+      #       "values":{
+      #         "%{name} added %n photos to their album": "%{name}は彼のアルバムに写真%n枚を追加しました",
+      #       }
+      #     }
+      #   ]
+      # })
+
+      console.log("--***********-------")
+      console.log( i18n("%{name} added %n photos to their album", 6, {name:"Bob"}, {gender:"male"}))
+      console.log("--***********-------")
+      assert.equal(i18n("%{name} added %n photos to their album", 6, {name:"Bob"}, {gender:"male"}), "Bobは彼のアルバムに写真6枚を追加しました")
+
 
     it "should translate all string properties in a given hash", ->
       hash = {
