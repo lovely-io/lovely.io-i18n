@@ -3,7 +3,7 @@
   "version":     "1.1.1",
   "description": "A simple utility to help with the internationalisation of your lovel.io projects.",
   "author":      "Simon Rodwell",
-  "home_url":    "https://github.com/roddeh/lovely.io-i18n",
+  "home_url":    "https://github.com/lovely-io/lovely.io-i18n/i18n",
   "license":     "MIT",
   "tags":        "i18n, internationalisation, language, translation",
   "dependencies": {}
