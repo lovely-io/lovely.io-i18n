@@ -14,22 +14,40 @@
 # @returns {String} The translated and formatted string.
 #
 # i18n = (text, options = {}) ->
-i18n = (text, numOrformatting, formattingOrContext, context = @globalContext) ->
-  if isObject(numOrformatting)
-    formatting = numOrformatting
-    context = formattingOrContext || @globalContext
+i18n = (text, langNumOrFormatting, numOrFormattingOrContext, formattingOrContext, context = @globalContext) ->
+  # Handle all the different cases of parameters
+  if isObject(langNumOrFormatting)
+    lang = null
+    num = null
+    formatting = langNumOrFormatting
+    context = numOrFormattingOrContext || @globalContext
   else
-    num = numOrformatting
-    formatting = formattingOrContext
-    context = context
+    if typeof langNumOrFormatting is "number"
+      lang = null
+      num = langNumOrFormatting
+      formatting = numOrFormattingOrContext
+      context = formattingOrContext || @globalContext
+    else
+      lang = langNumOrFormatting
+      if typeof numOrFormattingOrContext is "number"
+        num = numOrFormattingOrContext
+        formatting = formattingOrContext
+        context = context
+      else
+        num = null
+        formatting = numOrFormattingOrContext
+        context = formattingOrContext || @globalContext
+  
+  # Translate either the text or the hash
   if isObject(text)
     text = text['i18n'] if isObject(text['i18n'])
-    i18n.translateHash(text, num, formatting, context)
+    i18n.translateHash(text, context, lang)
   else
-    i18n.translate(text, num, formatting, context)
+    i18n.translate(text, num, formatting, context, lang)
 
 i18n.globalContext = null
 i18n.data = null
+i18n.languageData = null
 
 #
 # Adds key/value pair data and contexts that are to be used when translating text.
@@ -41,14 +59,23 @@ i18n.data = null
 #     "No":"いいえ"
 #   ]
 # }
+# 
+# @param {String} [optional] The language code for the data.
 # For a more complete example see: http://i18njs.com/i18n/ja.json
-i18n.add = (d) ->
+i18n.add = (d, lang) ->
+  if lang?
+    unless i18n.languageData[lang]?
+      i18n.languageData[lang] = {values:{}, contexts:[]}  
+    data = i18n.languageData[lang]
+  else
+    data = i18n.data
+
   if(d.values?)
     for k, v of d.values
-      i18n.data.values[k] = v;
+      data.values[k] = v;
   if(d.contexts?)
     for c in d.contexts
-      i18n.data.contexts.push(c)
+      data.contexts.push(c)
 
 #
 # Sets the context globally.  This context will be used when translating all strings unless a different context is provided when calling i18n()
@@ -69,14 +96,16 @@ i18n.clearContext = (key) ->
 # Destroys all translation and context data.
 #
 i18n.reset = () ->
-  i18n.data = {values:[], contexts:[]}
+  i18n.data = {values:{}, contexts:[]}
   i18n.globalContext = {}
+  i18n.languageData = {}
 
 #
 # Destroys all translation data.  Useful for when you change languages
 #
 i18n.resetData = () ->
-  i18n.data = {values:[], contexts:[]}
+  i18n.data = {values:{}, contexts:[]}
+  i18n.languageData = {}
 
 #
 # Destroys all context data.
@@ -85,19 +114,30 @@ i18n.resetContext = () ->
   i18n.globalContext = {}
 
 #
+# Destroys all translation data for a specific language
+#
+i18n.resetLanguage = (lang) ->
+  i18n.languageData[lang] = null
+
+#
 # Translates all the keys in a hash.  Useful for translating the i18n propety that exists for some lovely.io packages.
 # @param {Object} Hash containing the strings to be translated
 # @param {Object} Context to be used when translating the hash values
 #
-i18n.translateHash = (hash, context) ->
-  hash[k] = i18n.translate(v, null, null, context) for k, v of hash when typeof v is "string"
+i18n.translateHash = (hash, context, language) ->
+  hash[k] = i18n.translate(v, null, null, context, language) for k, v of hash when typeof v is "string"
   return hash
 
 #
 # Private
 #
-i18n.translate = (text, num, formatting, context = @globalContext) ->
-  data = i18n.data
+i18n.translate = (text, num, formatting, context = @globalContext, language) ->
+  # Try to grab the data based on language
+  data = i18n.languageData[language] if language?
+  # Check that the data for the language exists otherwise use the default
+  data = i18n.data unless data?
+
+
   # If we have failed to find any language data simply use the supplied text.
   return i18n.useOriginalText(text, num, formatting) unless data?
   # Try to get a result using the current context

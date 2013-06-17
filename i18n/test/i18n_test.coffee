@@ -3,6 +3,7 @@
 #
 # Copyright (C) 2013 Simon Rodwell
 #
+
 {Test, assert} = require('lovely')
 
 describe "i18n", ->
@@ -88,8 +89,29 @@ describe "i18n", ->
         ]
       })
 
+    it "should receive data for a specific language", ->
+      i18n.add({
+        "values":{
+          "Cancel": "отменить"
+        }, 
+        "contexts":[
+          {
+            "matches":{
+              "gender":"male"
+            },
+            "values":{
+              "%{name} updated their profile": "%{name} обновил свой профиль"
+            }
+          }
+        ]
+      }, "ru")
+
+
     it "should translate simple text.", ->
       assert.equal(i18n("Yes"), "はい")
+
+    it "should translate simple text, when given a language.", ->
+      assert.equal(i18n("Cancel", "ru"), "отменить")
 
     it "should use contexts when provided", ->
       assert.equal(i18n("%{name} updated their profile", {name:"Bob"}, {gender:"male"}), "Bobは彼のプロフィールを更新し")
@@ -109,24 +131,7 @@ describe "i18n", ->
       assert.equal(i18n("%{name} updated their profile", {name:"Bob"}), "Bobはプロフィールを更新し")
 
     it "should handle the case of pluralisation, formatting and context.", ->
-      # i18n.add({
-      #   contexts:[
-      #     {
-      #       "matches":{
-      #         "gender":"male"
-      #       },
-      #       "values":{
-      #         "%{name} added %n photos to their album": "%{name}は彼のアルバムに写真%n枚を追加しました",
-      #       }
-      #     }
-      #   ]
-      # })
-
-      console.log("--***********-------")
-      console.log( i18n("%{name} added %n photos to their album", 6, {name:"Bob"}, {gender:"male"}))
-      console.log("--***********-------")
       assert.equal(i18n("%{name} added %n photos to their album", 6, {name:"Bob"}, {gender:"male"}), "Bobは彼のアルバムに写真6枚を追加しました")
-
 
     it "should translate all string properties in a given hash", ->
       hash = {
@@ -164,6 +169,16 @@ describe "i18n", ->
       }
       i18n(Widget)
       assert.equal(Widget.i18n.cancel, "キャンセル")
+
+    it "should translate a hash given a specific language", ->
+      hash = {
+        cancel: "Cancel"
+      }
+      i18n(hash, "ru")
+      assert.equal(hash.cancel, "отменить")
+
+    it "should translate text given a language, formatting and context", ->
+      assert.equal(i18n("%{name} updated their profile", "ru", {name:"Nik"}, {gender:"male"}), "Nik обновил свой профиль")
 
     it "should go back to returning the key after the data has been reset", ->
       i18n.reset()

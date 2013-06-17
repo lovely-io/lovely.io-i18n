@@ -1,0 +1,11 @@
+{
+  "name":        "i18n-ja",
+  "version":     "1.0.0",
+  "description": "A Japanese extension for i18n",
+  "author":      "Simon Rodwell",
+  "license":     "MIT",
+  "tags":        "i18n, internationalisation, language, translation, Japanese",
+  "dependencies": {
+    "i18n" : "1.4.0"
+  }
+}
